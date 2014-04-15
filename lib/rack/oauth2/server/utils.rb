@@ -22,6 +22,10 @@ module Rack
           (Array === scope ? scope.join(" ") : scope || "").split(/\s+/).compact.uniq.sort
         end
 
+        def check_uris(uris)
+          uris.split("\n").map{|uri| parse_redirect_uri(uri).to_s}.join("\n")
+        end
+
       end
 
     end

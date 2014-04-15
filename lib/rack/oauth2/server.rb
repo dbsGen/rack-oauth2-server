@@ -337,7 +337,7 @@ module Rack
             # 3. Obtaining End-User Authorization
             response_type = request.GET["response_type"].to_s # Need this first, for error handling
             client = get_client(request, :dont_authenticate => true)
-            raise RedirectUriMismatchError unless client.redirect_uri.nil? || client.redirect_uri == redirect_uri.to_s
+            raise RedirectUriMismatchError unless client.redirect_uri.split('\n').include? redirect_uri.to_s
             raise UnsupportedResponseTypeError unless options.authorization_types.include?(response_type)
             requested_scope = Utils.normalize_scope(request.GET["scope"])
             allowed_scope = client.scope
@@ -346,7 +346,7 @@ module Rack
             # handle the rest.
             auth_request = AuthRequest.create(client, requested_scope, redirect_uri.to_s, response_type, state)
             uri = URI.parse(request.url)
-            uri.query = URI.encode_www_form(authorization: auth_request.id.to_s, email: request.GET[:email])
+            uri.query = URI.encode_www_form(authorization: auth_request.id.to_s, email: request.GET['email'])
             return redirect_to(uri, 303)
           end
         rescue OAuthError=>error

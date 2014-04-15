@@ -26,7 +26,7 @@ module Rack
           # them as suggested would result in better user experience.  Don't ask
           # how we learned that.
           def create(args)
-            redirect_uri = Server::Utils.parse_redirect_uri(args[:redirect_uri]).to_s if args[:redirect_uri]
+            redirect_uri = Server::Utils.check_uris(args[:redirect_uri]) if args[:redirect_uri]
             scope = Server::Utils.normalize_scope(args[:scope])
             fields =  { :display_name=>args[:display_name], :link=>args[:link],
                         :image_url=>args[:image_url], :redirect_uri=>redirect_uri,
@@ -110,7 +110,8 @@ module Rack
 
         def update(args)
           fields = [:display_name, :link, :image_url, :notes].inject({}) { |h,k| v = args[k]; h[k] = v if v; h }
-          fields[:redirect_uri] = Server::Utils.parse_redirect_uri(args[:redirect_uri]).to_s if args[:redirect_uri]
+
+          fields[:redirect_uri] = Server::Utils.check_uris(args[:redirect_uri]) if args[:redirect_uri]
           fields[:scope] = Server::Utils.normalize_scope(args[:scope])
           self.class.collection.update({ :_id=>id }, { :$set=>fields })
           self.class.find(id)
